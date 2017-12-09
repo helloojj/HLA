@@ -1,0 +1,33 @@
+// lecture csci10 08-30-17
+
+program pinatas;
+
+#include ("stdlib.hhf");
+
+static
+candies: uns8;
+whacks: uns8;
+whackAgain: char;
+
+begin pinatas;
+forever
+
+repeat
+stdout.put("How many candies?[min.30] ");
+stdin.getu8();
+mov(al, candies);
+stdout.put("You entered ", (type uns8 al), " (", candies, ") candies ", nl);
+until(candies >= 30);
+
+
+stdout.put("Whack again [y/n]? ");
+stdin.flushInput();
+stdin.getc();
+mov(al, whackAgain);
+stdout.put("you said ", (type char al), "[", whackAgain, "]!", nl);
+
+breakif(whackAgain == 'n');
+
+endfor;
+
+end pinatas;

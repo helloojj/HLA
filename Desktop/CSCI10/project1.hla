@@ -1,0 +1,337 @@
+
+program project1;
+
+#include("stdlib.hhf");
+static 
+    holdCost: uns16;
+    totalCost: uns16;
+    userCredits: uns16;
+    itemNumber: uns16;
+
+    shoes: int16 := 5;
+    tea:   int16 := 10;
+    keys:  int16 := 1;
+    pens:  int16 := 4;
+    headphones: int16 := 6;
+
+// to output how many of each you bought
+shoes_: uns16;
+tea_: uns16;
+keys_: uns16;
+pens_: uns16;
+headphones_: uns16;
+
+procedure getUns16(min: uns16; max: uns16); @forward;
+procedure outOfStock; @forward;
+procedure subItem(value: uns16); @forward;
+procedure addCost(value: uns16); @forward;
+procedure receipt(value: uns16); @forward;
+procedure payment; @forward;
+
+procedure getUns16(min: uns16; max: uns16);
+
+begin getUns16;
+forever
+    
+    try
+    stdin.getu16();
+    unprotected;
+    if(ax >= min && ax <= max) then
+        break;
+    else
+        stdout.put("Enter a value between ", min, " and ", max,nl);
+      endif;
+    anyexception
+      stdout.put( "Invaild input.", nl );
+      stdout.put("Try again", nl);
+    endtry;
+
+    endfor;
+    //stdout.put(itemNumber);
+
+end getUns16;
+
+// subtract the items from each other
+procedure subItem(value: uns16);
+
+begin subItem;
+
+    if(value == 1) then
+        sub(1,shoes);
+        stdout.put("***** You Chose Shoes *****",nl);
+
+    elseif(value == 2) then
+        sub(1,tea);
+        stdout.put("***** You Chose Tea *****",nl);
+
+    elseif(value == 3) then
+        sub(1,keys);
+        stdout.put("***** You Chose Keys *****",nl);
+ 
+    elseif(value == 4) then
+        sub(1,pens);
+        stdout.put("***** You Chose Pens *****",nl);
+
+    elseif(value == 5) then
+        sub(1,headphones);
+        stdout.put("***** You Choose Headphones *****",nl);
+
+    endif;
+
+end subItem;
+
+// check for item in stock
+procedure outOfStock;
+var 
+    hold: uns8;
+
+begin outOfStock;
+
+    repeat 
+
+    if(shoes < 1 && itemNumber == 1) then
+        while(itemNumber == 1) do
+
+            stdout.put("shoes are out of stock. Enter differnt option",nl);
+            getUns16(0,5); 
+            mov(ax,itemNumber);
+        endwhile;    
+ 
+    elseif(tea < 1 && itemNumber == 2) then
+        while(itemNumber == 2) do
+            stdout.put("tea are out of stock. Enter differnt option",nl);
+            getUns16(0,5); 
+            mov(ax,itemNumber);
+        endwhile;    
+
+    elseif(keys < 1 && itemNumber == 3) then
+        while(itemNumber == 3) do
+            stdout.put("keys are out of stock. Enter differnt option",nl);
+            getUns16(0,5); 
+            mov(ax,itemNumber);
+        endwhile;    
+ 
+    elseif(pens < 1 && itemNumber == 4) then
+        while(itemNumber == 4) do
+            stdout.put("pens are out of stock. Enter differnt option",nl);
+            getUns16(0,5); 
+            mov(ax,itemNumber);
+        endwhile;    
+    elseif(headphones < 1 && itemNumber == 5) then
+        while(itemNumber == 5) do
+            stdout.put("headphones are out of stock. Enter differnt option",nl);
+            getUns16(0,5); 
+            mov(ax,itemNumber);
+        endwhile;
+        else
+            mov(1,hold);
+            mov(ax,itemNumber);
+    endif;
+
+//stdout.put("It getting here", (type uns8 hold),nl);
+
+until(hold == 1);
+
+end outOfStock;
+
+// add the total cost and cost for each item
+procedure addCost(value: uns16);
+
+begin addCost;
+    if(itemNumber == 1) then
+        add(20,totalCost);
+        mov(20,holdCost);
+
+    elseif(itemNumber == 2) then
+        add(1,totalCost);
+        mov(1,holdCost);
+
+    elseif(itemNumber == 3) then
+        add(5,totalCost);
+        mov(5,holdCost);
+
+    elseif(itemNumber == 4) then
+        add(4,totalCost);
+        mov(4,holdCost);
+
+    elseif(itemNumber == 5) then
+        add(30,totalCost);
+        mov(30,holdCost);
+
+    endif;
+
+end addCost;
+
+// create a receipt
+procedure receipt(value: uns16);
+
+begin receipt;
+
+    if(value == 1) then
+        add(1,shoes_);
+
+    elseif(value == 2) then
+        add(1,tea_);
+
+    elseif(value == 3) then
+        add(1,keys_);
+
+    elseif(value == 4) then
+        add(1,pens_);
+
+    elseif(value == 5) then
+        add(1,headphones_);
+endif;
+
+end receipt;
+
+// take in a payment from the user
+procedure payment;
+
+begin payment;
+
+forever
+    
+    if(totalCost == 0) then
+        break;
+    endif;
+    try
+    stdin.getu16();
+    unprotected;
+    if(ax >= holdCost && ax <= 200) then
+        break;
+    else
+     stdout.put("Pay funds ", holdCost, " to 150 credits ", nl);
+      endif;
+    anyexception
+      stdout.put( "Invaild input.", nl );
+      stdout.put("Try again", nl);
+    endtry;
+
+    endfor;
+    mov(ax,userCredits);
+
+    end payment;
+
+// return change back to the user
+procedure makeChange;
+var 
+    
+    value: uns16;
+    cashBack: uns16;
+    quarters: uns16;
+    dimes: uns16;
+    nickels: uns16;
+    pennies: uns16;
+
+begin makeChange;
+    mov(userCredits, ax);
+    sub(holdCost, ax);
+    mov(ax,cashBack);
+
+    stdout.put("Total credits back: ", (type uns16 cashBack),nl);
+
+    mov(0,dx);
+    div(25,dx:ax);
+    mov(ax,quarters);
+    stdout.put("Quarters back: ", (type uns16 quarters),nl);
+
+    mov(dx,ax);
+    mov(0,dx);
+    div(10,dx:ax);
+    mov(ax,dimes);
+    stdout.put("Dimes back: ", (type uns16 dimes),nl);
+
+    mov(dx,ax);
+    mov(0,dx);
+    div(5,dx:ax);
+    mov(ax,nickels);
+    stdout.put("Nickels back: ", (type uns16 nickels),nl);
+
+    mov(dx,pennies);
+    stdout.put("Pennies back: ", (type uns16 pennies),nl);
+
+
+end makeChange;
+
+// start the main program
+begin project1;
+
+
+
+forever
+
+// out puts the items and whats in stock
+stdout.put("Here is our stock",nl,nl);
+stdout.put("item:           credits:      stock:",nl);
+stdout.put("------------------------------------",nl);
+stdout.put("1)shoes         20            ",shoes ,nl);
+stdout.put("2)tea           1             ",tea ,nl);
+stdout.put("3)keys          5             ",keys ,nl);
+stdout.put("4)pens          4             ",pens ,nl);
+stdout.put("5)headphones    30            ",headphones ,nl);
+
+stdout.put("Enter the number on the side of the item to select that product." ,nl);
+stdout.put("If you dont want anything/out stock press 0",nl);
+
+getUns16(0,5);
+mov(ax,itemNumber);
+
+// lets user leave the program
+if(itemNumber == 0) then
+    break;
+endif;
+
+outOfStock();
+if(itemNumber == 0) then
+    break;
+endif;
+
+
+subItem(itemNumber);
+receipt(itemNumber);
+addCost(itemNumber);
+
+stdout.put("Enter credits to pay for item",nl);
+stdout.put("Credit Cost: ", holdCost,nl );
+payment();
+makeChange();
+
+stdout.put("Enter 0 if youd like to exit...
+if you'd like to make another purchase enter 1.",nl);
+
+//lets user leave the program
+getUns16(0,1);
+if(ax == 0) then 
+break;
+endif;
+
+endfor;
+
+// prints the recipiet
+stdout.put("Your recipiet",nl);
+stdout.put("item:         Purchased:    Credits:",nl);
+stdout.put("--------------------------------------",nl);
+
+mov(20, ax);
+mul(shoes_,ax);
+stdout.put("shoes         ",shoes_ ,"             ",(type uns16 ax),nl );
+
+mov(1, ax);
+mul(tea_,ax);
+stdout.put("tea           ",tea_ ,"             ",(type uns16 ax),nl );
+
+mov(5, ax);
+mul(keys_,ax);
+stdout.put("keys          ",keys_ ,"             ",(type uns16 ax),nl );
+
+mov(4, ax);
+mul(pens_,ax);
+stdout.put("pens          ",pens_ ,"             ",(type uns16 ax),nl );
+
+mov(30, ax);
+mul(headphones_,ax);
+stdout.put("headphones    ",headphones_ ,"             ",(type uns16 ax),nl );
+stdout.put("Your Total Cost: ", totalCost," credits",nl,nl );
+
+end project1;

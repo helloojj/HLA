@@ -1,0 +1,94 @@
+/*
+* HLA Starter
+*
+* written by Justin Johnson
+* created on 9 September 2017
+* last modified on 9 September 2017
+*
+*/
+
+program challenge3;
+
+#include( "stdlib.hhf" );
+
+static
+totalGuesses: uns8;
+number: uns8;
+numGuessed: uns8;
+userNum: uns32;
+randomValue: uns32;
+// to let the user end the program
+stopLetter: char;
+
+procedure getUns32; @forward;
+
+procedure getUns32;
+begin getUns32;
+
+forever
+stdout.put("Please enter a value from 1-100",nl);
+try
+	stdin.getu32();
+unprotected break;
+anyexception
+	stdout.put("Try again", nl);
+endtry;
+	mov(eax,userNum);
+	//stdout.put("You guessed ", userNum,nl);
+
+endfor;
+
+end getUns32;
+
+begin challenge3;
+forever
+
+rand.randomize();
+rand.urange( 1, 100 );
+mov( eax, randomValue );
+stdout.put(al);
+
+	// crate while loop to stop at guess 10
+	mov(1,totalGuesses);
+	while(totalGuesses < 10) do
+
+		getUns32();
+
+		if (randomValue < eax) then
+		stdout.put("Your guess is to high",nl);
+
+		elseif (randomValue > eax) then
+		stdout.put("Your guess is to low ",nl);
+
+		elseif (randomValue == eax) then
+		stdout.put("You Guessed correctly!!! :)",nl);
+		break;
+
+		endif;
+
+		add(1,totalGuesses);
+		stdout.put("You are on guess ", totalGuesses,nl);
+
+	endwhile;
+
+	// outputs the random number if the user didnot correctly
+	if( userNum != eax ) then
+	stdout.put("The random number is ", randomValue,nl);
+	endif;
+
+//static number: uns8;
+mov(255, number);
+mov(number, al);
+add(1, al);
+
+
+	// creating a stop point tp break the loop
+	stdout.put("Would you like to play again?[y/n]",nl);
+	stdin.flushInput();
+	stdin.getc();
+	mov(al, stopLetter);
+	breakif(stopLetter == 'n');
+
+endfor;
+
+end challenge3;

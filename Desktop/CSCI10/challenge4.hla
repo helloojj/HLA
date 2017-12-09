@@ -1,0 +1,89 @@
+/*
+
+ * written by			JUstin Johnson
+ * created on			11 September 2017
+ * last modified on		11 September 2017
+ *
+ */
+
+program challenge4;
+
+#include( "stdlib.hhf" );
+
+begin challenge4;
+// grab four uns8 values from the user
+forever
+
+//getting the uns8 registors values
+stdout.put("hello please enter an uns8 value ",nl);
+mov(stdin.getu8(), dl);
+stdout.put("Please enter a second uns8 value ",nl);
+mov(stdin.getu8(), cl);
+stdout.put("Please enter a thrid uns8 value ",nl);
+mov(stdin.getu8(), bl);
+stdout.put("Please enter a fourth uns8 value ",nl);
+mov(stdin.getu8(), al);
+
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns8 dl), nl, "Hex: ", dl, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns8 cl), nl, "Hex: ", cl, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns8 bl), nl, "Hex: ", bl, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns8 al), nl, "Hex: ", al, nl);
+
+// getting uns16 registors values
+stdout.put("hello please enter an uns16 value ",nl);
+mov(stdin.getu16(), dx);
+stdout.put("Please enter a second uns16 value ",nl);
+mov(stdin.getu16(), cx);
+stdout.put("Please enter a thrid uns16 value ",nl);
+mov(stdin.getu16(), bx);
+stdout.put("Please enter a fourth uns16 value ",nl);
+mov(stdin.getu16(), ax);
+
+stdout.put("here are the uns16 registors values", nl);
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns16 dx), nl, "Hex: ", dx, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns16 cx), nl, "Hex: ", cx, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns16 bx), nl, "Hex: ", bx, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns16 ax), nl, "Hex: ", ax, nl);
+
+// outputting the uns8 registors values again!!!
+stdout.put("Here are the four uns8 registors values again", nl);
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns8 dl), nl, "Hex: ", dl, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns8 cl), nl, "Hex: ", cl, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns8 bl), nl, "Hex: ", bl, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns8 al), nl, "Hex: ", al, nl);
+
+// getting uns32 registors values
+stdout.put("hello please enter an uns32 value ",nl);
+mov(stdin.getu32(), edx);
+stdout.put("Please enter a second uns32 value ",nl);
+mov(stdin.getu32(), ecx);
+stdout.put("Please enter a thrid uns32 value ",nl);
+mov(stdin.getu32(), ebx);
+stdout.put("Please enter a fourth uns32 value ",nl);
+mov(stdin.getu32(), eax);
+
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns32 edx), nl, "Hex: ", dx, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns32 ecx), nl, "Hex: ", cx, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns32 ebx), nl, "Hex: ", bx, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns32 eax), nl, "Hex: ", ax, nl);
+
+// outputting the uns16 registors values again!!!!
+stdout.put("here are the uns16 registors values ", nl);
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns16 dx), nl, "Hex: ", dx, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns16 cx), nl, "Hex: ", cx, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns16 bx), nl, "Hex: ", bx, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns16 ax), nl, "Hex: ", ax, nl);
+
+// outputting the uns8 registors values again!!!
+stdout.put("Here are the four uns8 registors values again", nl);
+stdout.put("Here is the first value ", nl, "Decimal: ", (type uns8 dl), nl, "Hex: ", dl, nl);
+stdout.put("Here is the second value ",nl, "Decimal: ", (type uns8 cl), nl, "Hex: ", cl, nl );
+stdout.put("Here is the thrid value ", nl, "Decimal: ", (type uns8 bl), nl, "Hex: ", bl, nl);
+stdout.put("Here is the fourth value ", nl, "Decimal: ", (type uns8 al), nl, "Hex: ", al, nl);
+
+stdout.put("Would you like to start over? [y/n]", nl);
+mov(al,stdin.getc());
+breakif(stdin.getc() == 'n');
+endfor;
+
+end challenge4;

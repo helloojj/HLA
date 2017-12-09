@@ -1,0 +1,166 @@
+
+
+program challenge7;
+
+#include("stdlib.hhf");
+
+procedure getUns8(prompt: string; min: uns8; max: uns8); @forward;
+procedure showGraph(graph: uns8); @forward;
+procedure totalAndAverage(value: uns8; value2: uns8; value3: uns8; value4: uns8); @forward;
+procedure max(value: uns8; value2: uns8; value3: uns8; value4: uns8); @forward;
+procedure min(value: uns8; value2: uns8; value3: uns8; value4: uns8); @forward;
+
+procedure getUns8(prompt: string; min: uns8; max: uns8);
+begin getUns8;
+
+    push(ebx);
+    push(ecx);
+    
+    forever
+
+        stdout.put(prompt);
+        try
+            stdin.getu8();
+            unprotected;
+            if(al >= min && al <= max) then 
+                break;
+            else 
+                stdout.put("Enter a value between ", min, " and ", max,nl);
+            endif;
+        anyexception
+            stdout.put( "Invaild input.", nl );
+            stdout.put("Try again", nl);
+        endtry;    
+        endfor;
+    
+    pop(ecx);
+    pop(ebx);
+
+end getUns8;
+    
+procedure showGraph(graph: uns8);
+
+begin showGraph;
+    stdout.put(graph," ");
+    forever
+        if (graph < 10) then
+            break;
+        endif;
+        sub(10,graph);
+        stdout.put("*");
+
+    endfor;
+
+    stdout.put(nl);
+
+end showGraph;
+
+procedure totalAndAverage(value: uns8; value2: uns8; value3: uns8; value4: uns8);
+
+begin totalAndAverage;
+    
+    add(value2, al);
+    add(value3, al);
+    add(value4, al);
+    stdout.put("Total sum: ", (type uns8 al), nl);
+
+    mov(0,ah);
+    div(4, ax);
+
+    stdout.put("Average: ", (type uns8 al) , nl);
+
+end totalAndAverage;
+
+procedure min(value: uns8; value2: uns8; value3: uns8; value4: uns8);
+begin min;
+
+    //forever
+        if(al > value2) then
+            mov(value2, al);
+        endif;
+        if(al > value3) then
+            mov(value2, al);
+        endif;
+        if( al > value4) then
+            mov(value4, al);
+        endif;
+
+    //endfor;
+
+    //mov(al, value);
+    stdout.put("min value: ", (type uns8 al) , nl);
+
+end min;
+
+procedure max(value: uns8; value2: uns8; value3: uns8; value4: uns8);
+begin max;
+
+    //forever
+        if(al < value2 ) then
+            mov(value2, al);
+        endif;
+        if(al < value3) then
+            mov(value3, al);
+        endif;
+        if( al < value4) then
+            mov(value4, al);
+        endif;
+
+    //endfor;
+
+    //mov(al, value);
+    stdout.put("max value: ", (type uns8 al) , nl);
+
+end max;
+
+begin challenge7;
+
+    forever 
+
+    // read in 4 valvues and store them 
+    // in al/bl/cl/dl in that order
+    getUns8("enter a value between [0-50]", 0, 50);
+    push(eax);
+
+    getUns8("enter a value between [0-50]", 0, 50);
+    mov(al,bl);
+
+    getUns8("enter a value between [0-50]", 0, 50);
+    mov(al,cl);
+
+    getUns8("enter a value between [0-50]", 0, 50);
+    mov(al,dl);
+
+    pop(eax);
+    
+    stdout.put("al = ", (type uns8 al), nl);
+    stdout.put("bl = ", (type uns8 bl), nl);
+    stdout.put("cl = ", (type uns8 cl), nl);
+    stdout.put("dl = ", (type uns8 dl), nl);
+
+    showGraph(al);
+    showGraph(bl);
+    showGraph(cl);
+    showGraph(dl);
+
+    push(eax);
+    totalAndAverage(al, bl, cl, dl);
+    pop(eax);
+
+    push(eax);
+    min(al, bl, cl, dl);
+    pop(eax);
+
+    max(al, bl, cl, dl);
+
+    //pop(eax);
+
+    //lets user leave the program
+    getUns8("enter 0 to quit 1, to restart" ,0,1);
+    if(ax == 0) then 
+    break;
+    endif;
+
+    endfor;
+
+end challenge7;

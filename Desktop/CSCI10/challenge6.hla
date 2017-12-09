@@ -1,0 +1,88 @@
+program challenge6;
+
+#include("stdlib.hhf");
+static 
+    input: uns16;
+
+procedure getUns16(prompt: string; min: uns16; max: uns16); @forward;
+procedure showFactors(value: uns16); @returns("al"); @forward;
+
+procedure getUns16(prompt: string; min: uns16; max: uns16); 
+
+begin getUns16;
+
+forever
+    
+    stdout.put(prompt);
+    try
+        stdin.getu16();
+        unprotected;
+        if(ax >= min && ax <= max) then
+            break;
+        else
+            stdout.put("Enter a value between ", min, " and ", max,nl);
+        endif;
+        anyexception
+            stdout.put( "Invaild input.", nl );
+            stdout.put("Try again", nl);
+        endtry;  
+        //mov(ax, input);   
+
+    endfor;
+
+end getUns16;
+
+procedure showFactors(value: uns16);
+var 
+    count: uns16;
+
+begin showFactors;
+	
+	mov(0,count);
+    stdout.put("factors of " , value, ": ");
+    
+    mov(0,ebx);
+    mov(value,bx);
+                        
+    for(mov(1,ecx); ecx < ebx; inc(ecx))do
+        mov(ebx, eax);
+        mov(0,edx);
+        div(ecx,edx:eax);
+
+        if(edx == 0) then
+            stdout.put((type uns32 ecx), " ");
+            //inc(count);
+            //stdout.put((type uns16 count), " hellooo", nl);
+        endif;
+
+        if(edx == 0 && ecx != 1) then
+        inc(count);
+        endif;
+    endfor;
+
+    if(count > 0) then
+       mov(0,al);
+    elseif(count == 0) then
+        mov(1,al);
+     endif;
+
+    stdout.put(value);
+    stdout.newln();
+
+end showFactors;
+
+
+begin challenge6;
+getUns16( "enter a number (2-65535)", 2, 65535);
+mov(ax, input);
+showFactors(input);
+//mov(showFactors(ax), al);
+//stdout.put((type uns8 al), " hellooo" ,nl);
+
+if(al == 0) then
+stdout.put((type uns16 input), " is not prime.", nl)
+elseif(al == 1) then
+stdout.put((type uns16 input), " is prime.", nl)
+endif;
+
+end challenge6;

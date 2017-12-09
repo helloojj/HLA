@@ -1,0 +1,175 @@
+/*
+ *
+ * written by            Justin Johnson
+ * created on            20 September 2017
+ * last modified on      21 September 2017
+ *
+ */
+program challenge5;
+
+#include("stdlib.hhf");
+static 
+    bankRoll: uns16 := 1000;
+    wagerAmt: uns16;
+    stopChar: char;
+
+procedure getUns16(prompt: string; min: uns16; max: uns16); @forward;
+procedure showSymbol(symbol: uns32); @forward;
+procedure spinOneWheel; @returns("eax"); @forward;
+procedure spinAllWheels; @forward;
+
+procedure getUns16(prompt: string; min: uns16; max: uns16);
+begin getUns16;
+    forever
+    
+        stdout.put(prompt);
+        try
+            stdin.getu16();
+            unprotected;
+            if(ax >= min && ax <= max) then 
+                break;
+            else 
+                stdout.put("Enter a value between ", min, " and ", max,nl);
+            endif;
+        anyexception
+            stdout.put( "Invaild input.", nl );
+            stdout.put("Try again", nl);
+        endtry;
+        //mov(wagerAmt, ax);
+
+    endfor;
+
+end getUns16;
+
+procedure showSymbol(symbol: uns32);
+
+begin showSymbol;
+    if( symbol == 1 ) then
+        stdout.put("@CHERRY@");
+    elseif( symbol == 2 ) then
+        stdout.put("$MONEY$");
+    elseif( symbol == 3 ) then 
+        stdout.put("*STAR*");
+    endif;
+end showSymbol;
+
+procedure spinOneWheel;
+var 
+    randNum: uns32;
+
+begin spinOneWheel;
+
+    rand.randomize();
+    rand.urange( 1, 100 );
+    mov( eax, randNum );
+    //stdout.put((type uns32 randNum),nl);
+
+    if ( randNum < 80 ) then 
+        mov( 1, eax );
+    elseif ( randNum < 95 ) then 
+        mov( 2, eax );
+    elseif ( randNum > 95 ) then
+        mov( 3, eax );
+    endif;
+    //stdout.put((type uns32 eax),nl);
+
+end spinOneWheel;
+
+procedure spinAllWheels;
+var 
+    wheelOne: uns32;
+    wheelTwo: uns32;
+    wheelThree: uns32;
+
+begin spinAllWheels;
+
+    spinOneWheel();
+    mov(spinOneWheel(),wheelOne);
+    //stdout.put((type uns32 wheelOne), nl);
+    showSymbol(wheelOne);
+    stdout.put("", nl);
+
+    spinOneWheel();
+    mov(spinOneWheel(),wheelTwo);
+    showSymbol(wheelTwo);
+    stdout.put("", nl);
+
+    spinOneWheel();
+    mov(spinOneWheel(),wheelThree);
+    showSymbol(wheelThree);
+    stdout.put("", nl);
+
+    if( wheelOne == 1 && wheelTwo == 1 && wheelThree == 1 ) then
+        mov(1,al);
+    elseif( wheelOne == 2 && wheelTwo == 2 && wheelThree == 2 ) then
+        mov(2,al);
+    elseif( wheelOne == 3 && wheelTwo == 3 && wheelThree == 3 ) then
+        mov(3,eax);
+    else
+        mov(0,al);
+    endif;
+
+
+end spinAllWheels;
+
+begin challenge5;
+stdout.put("Welcome to my cheap slot machine!:)",nl);
+stdout.put("You have $1000 in the bankroll",nl);
+stdout.put("You may play until you run out of money or until you want to quit which you will have the option after every roll :D",nl);
+
+forever
+
+    getUns16("Now please enter your wager from $1-$3",1,3);
+    mov(ax, wagerAmt);
+    //stdout.put( (type uns16 ax),nl);
+    spinAllWheels();
+
+    if(al == 0) then
+        // sub wager here
+        mov(wagerAmt, ax);
+        sub(ax ,bankRoll );
+        stdout.put("sorry but you lost you wager of ", (type uns16 wagerAmt), nl);
+        stdout.put("Here is your total bankroll now ", (type uns16 bankRoll), nl);
+
+    elseif(al == 1) then
+        // add to bank roll here
+        mov(wagerAmt, ax);
+        add(ax ,bankRoll );
+        stdout.put("Your wager has been added to your bank roll!! " nl);
+        stdout.put("Here is your total bankroll now ", (type uns16 bankRoll), nl);
+
+    elseif(al == 2) then
+        // double the wager and add to bank roll
+        mov(2, ax);
+        mul(wagerAmt,ax);
+        add(ax ,bankRoll );
+        stdout.put("Your wager was doubled and added to your bank roll!! " nl);
+        stdout.put("Here is your total bankroll now ", (type uns16 bankRoll), nl);
+
+    elseif(al == 3) then
+        // triple the wager and add to bank roll
+        mov(3, ax);
+        mul(wagerAmt,ax);
+        add(ax ,bankRoll );
+        stdout.put("Your wager was tripled and added to your bank roll!! " nl);
+        stdout.put("Here is your total bankroll now ", (type uns16 bankRoll), nl);
+    endif;
+
+    // end program if user runs out of money
+    if(bankRoll <= 0) then
+        stdout.put(" You are out of money:'( ");
+        break;
+    endif;
+    
+    // lets user quit the program
+    stdout.put("Would you like to go again? [y/n]", nl);
+    stdin.flushInput();
+    stdin.getc();
+    mov(al, stopChar);
+
+    breakif(stopChar == 'n');
+
+endfor;
+
+end challenge5;
+

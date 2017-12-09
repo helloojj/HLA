@@ -1,0 +1,139 @@
+program Challenge10;
+
+#include ("stdlib.hhf");
+static
+    x: int8;
+    y: int16;
+    z: int32;
+    //address: dword;
+
+procedure getInt8(prompt: string; min: int8; max: int8); @forward;
+procedure getInt16(prompt: string; min: int16; max: int16); @forward;
+procedure getInt32(prompt: string; min: int32; max: int32); @forward;
+procedure displayValue(address: dword; typeCode: uns8); @forward;
+
+procedure getInt8(prompt: string; min: int8; max: int8);
+begin getInt8;
+
+    //push(ebx);
+   // push(ecx);
+
+    forever
+
+        stdout.put(prompt);
+        try
+            stdin.geti8();
+            unprotected;
+            if(al >= min && al <= max) then
+                break;
+            else
+                stdout.put("Enter a value between ", min, " and ", max,nl);
+            endif;
+        anyexception
+            stdout.put( "Invaild input.", nl );
+            stdout.put("Try again", nl);
+        endtry;
+        endfor;
+    mov(al,x);
+    //pop(ecx);
+    //pop(ebx);
+
+end getInt8;
+
+procedure getInt16(prompt: string; min: int16; max: int16);
+begin getInt16;
+    forever
+
+        stdout.put(prompt);
+        try
+        stdin.geti16();
+        unprotected;
+        if(ax >= min && ax <= max) then
+            break;
+        else
+            stdout.put("Enter a value between ", min, " and ", max,nl);
+          endif;
+        anyexception
+          stdout.put( "Invaild input.", nl );
+          stdout.put("Try again", nl);
+        endtry;
+        endfor;
+    mov(ax,y);
+
+end getInt16;
+
+procedure getInt32(prompt: string; min: int32; max: int32);
+begin getInt32;
+    forever
+
+        stdout.put(prompt);
+        try
+        stdin.geti32();
+        unprotected;
+        if(eax >= min && eax <= max) then
+            break;
+        else
+            stdout.put("Enter a value between ", min, " and ", max,nl);
+          endif;
+        anyexception
+          stdout.put( "Invaild input.", nl );
+          stdout.put("Try again", nl);
+        endtry;
+        endfor;
+    mov(eax,z);
+
+end getInt32;
+
+procedure displayValue(address: dword; typeCode: uns8);
+
+begin displayValue;
+    mov(address, eax);
+    if (typeCode == 1) then
+        lea(eax, x);
+        mov(eax, address);
+        //mov(address, eax);
+
+        stdout.put("$", address, " = ");
+        stdout.put((type int8 [eax]), " (int8)", nl)
+
+    elseif (typeCode == 2) then
+        lea(eax, y);
+        mov(eax, address);
+       // mov(address, eax);
+
+        stdout.put("$", address, " = ");
+        stdout.put((type int16 [eax]), " (int16)", nl);
+
+    else
+        lea(eax, z);
+        mov(eax, address);
+       //mov(address, eax);
+
+        stdout.put("$", address, " = ");
+        stdout.put((type int32 [eax]), " (int32)", nl)
+
+    endif;
+
+end displayValue;
+
+
+
+begin Challenge10;
+    forever
+
+        getInt8("enter an int 8 value ", -128, 127);
+        getInt16("enter an int 16 value ", -32768, 32767);
+        getInt32("enter an int 32 value ", -2147483648, 2147483647);
+
+        displayValue(&x, 1);
+        displayValue(&y, 2);
+        displayValue(&z, 3);
+
+        getInt8("Would you like to do it again? 0 to quit 1 to continue", 0, 1);
+        if (al == 0) then
+        break;
+        endif;
+
+    endfor;
+
+end Challenge10;

@@ -1,0 +1,221 @@
+program challenge12;
+#include ("stdlib.hhf")
+
+static
+    arraySize: uns32;
+    arrayType: uns32;
+    addrr: dword;
+    endChar: char;
+
+procedure displayCells(address: dword; size: uns32; mtype: uns32); @forward;
+procedure editCell(addr: dword; index: uns32; mtype: uns32); @forward;
+procedure randomValues(address: dword; size: uns32; mtype: uns32); @forward;
+procedure computeLargest(address: dword; size: uns32; mtype: uns32); @forward;
+
+
+procedure displayCells(address: dword; size: uns32; mtype: uns32);
+var 
+    count: uns32;
+begin displayCells;
+    mov(0, count);
+
+    if (mtype == 1) then
+        stdout.put("uns8 -> ", nl);
+    elseif (mtype == 2) then
+        stdout.put("uns16 -> ", nl);
+    else
+        stdout.put("uns32 -> ", nl);
+    endif;
+
+    mov(address, eax);
+    for (mov(0, ecx); ecx<size; inc(ecx)) do
+        if (mtype == 1) then
+            stdout.put("[", count, "] ", (type uns8 [eax + ecx * 1]), nl);
+        elseif (mtype == 2) then
+            stdout.put("[", count, "] ", (type uns16 [eax + ecx * 2]), nl);
+        else
+            stdout.put("[", count, "] ", (type uns32 [eax + ecx * 4]), nl);
+        endif;
+        inc(count);
+    endfor;
+    stdout.newln();
+
+    stdout.put("LARGEST -> ");
+    if (mtype == 1) then
+        stdout.put((type uns8 [eax + ecx * 1]), " ");
+    elseif (mtype == 2) then
+        stdout.put((type uns16 [eax + ecx * 2]), " ");
+    else
+        stdout.put((type uns32 [eax + ecx * 4]), " ");
+    endif;
+    stdout.newln();
+
+end displayCells;
+
+procedure editCell(addr: dword; index: uns32; mtype: uns32);
+begin editCell;
+
+    if (mtype = 1) then
+        stdout.put("Enter a new uns8 value: ");
+        stdin.flushInput();
+        stdin.getu8();
+        mov(addr, ebx);
+        mov(index, ecx);
+        mov(ax, [ebx + ecx]);
+
+    elseif (mtype = 2) then
+        stdout.put("Enter a new uns16 value: ");
+        stdin.flushInput();
+        stdin.getu16();
+        mov(addr, ebx);
+        mov(index, ecx);
+        mov(ax, [ebx + ecx * 2]);
+
+    elseif (mtype = 3) then
+        stdout.put("Enter a new uns32 value: ");
+        stdin.flushInput();
+        stdin.getu32();
+        mov(addr, ebx);
+        mov(index, ecx);
+        mov(ax, [ebx + ecx * 4]);
+
+    endif;
+
+end editCell;
+
+procedure computeLargest(address: dword; size: uns32; mtype: uns32);
+begin computeLargest;
+
+    mov(address, ebx);
+
+    // assume the first element is the largest
+    mov(0, edx);
+    if (mtype == 1) then
+        mov((type uns8 [ebx]), dl);
+    elseif (mtype == 2) then
+        mov((type uns16 [ebx]), dx);
+    else
+        mov((type uns32 [ebx]), edx);
+    endif;
+
+    // look through the remaining elements to see if any is bigger
+    for (mov(1, ecx); ecx<size; inc(ecx)) do
+        if (mtype == 1) then
+            if ((type uns8 [ebx + ecx * 1]) > dl) then
+                mov((type uns8 [ebx + ecx * 1]), dl);
+            endif;
+        elseif (mtype == 2) then
+            if ((type uns16 [ebx + ecx * 2]) > dx) then
+                mov((type uns16 [ebx + ecx * 2]), dx);
+            endif;
+        else
+            if ((type uns32 [ebx + ecx * 4]) > edx) then
+                mov((type uns32 [ebx + ecx * 4]), edx);
+            endif;
+        endif;
+    endfor;
+
+    // write largest value into "secret/compute" cell
+    if (mtype == 1) then
+        mov(dl, (type uns8 [ebx + ecx * 1]));
+    elseif (mtype == 2) then
+        mov(dx, (type uns16 [ebx + ecx * 2]));
+    else
+        mov(edx, (type uns32 [ebx + ecx * 4]));
+    endif;
+
+end computeLargest;
+
+procedure randomValues(address: dword; size: uns32; mtype: uns32);
+begin randomValues;
+
+    mov(address, ebx);
+    for (mov(0, ecx); ecx<size; inc(ecx)) do
+        if (mtype == 1) then
+            rand.urange(1, 50);
+            mov(al, (type uns8 [ebx + ecx * 1]));
+        elseif (mtype == 2) then
+            rand.urange(100, 500);
+            mov(ax, (type uns16 [ebx + ecx * 2]));
+        else
+            rand.urange(1000, 5000);
+            mov(eax, (type uns32 [ebx + ecx * 4]));
+        endif;
+    endfor;
+
+end randomValues;
+
+
+
+begin challenge12;
+
+rand.randomize();
+
+forever
+
+stdout.put("Size of the array? ");
+stdin.getu32();
+mov(eax, arraySize);
+
+stdout.put("What type [1: uns8, 2: uns16, 3: uns32]: ");
+stdin.flushInput();
+stdin.getu32();
+mov(eax, arrayType);
+
+// use eax to hold number of bytes for array
+mov(arraySize, eax);
+inc(eax);
+if (arrayType == 2) then
+    mul(2, eax);
+elseif (arrayType == 3) then
+    mul(4, eax);
+endif;
+
+// allocate the memory
+stdout.put("Allocating ", (type uns32 eax), " bytes...", nl);
+mem.zalloc(eax);
+mov(eax, addrr);
+
+// do processing work here, probably in a loop
+forever
+    randomValues(addrr, arraySize, arrayType);
+    stdout.newln();
+
+    computeLargest(addrr, arraySize, arrayType);
+    displayCells(addrr, arraySize, arrayType);
+
+    // ask if the users want to edit a value in the array
+    stdout.put("would you like to edit a value in the array? [y/n]");
+    stdin.flushInput();
+    mov(chars.toUpper(stdin.getc()), endChar);
+
+    forever
+        if (endChar == 'Y')then
+            
+                stdout.put("enter index for number youd like to edit", nl);
+                stdin.getu32();
+                editCell(addrr, eax, arrayType);
+                computeLargest(addrr, arraySize, arrayType);
+                displayCells(addrr, arraySize, arrayType);
+    
+        elseif (endChar == 'N') then 
+            break;
+        endif;
+
+        stdout.put("Edit another value [y/n]? ");
+        stdin.flushInput();
+        mov(chars.toUpper(stdin.getc()), endChar);
+
+    endfor;
+    breakif(endChar == 'N');
+
+endfor;
+
+mem.free(addrr);
+
+    stdout.put("Would you like to start COMPLETLY over? [y/n]? ");
+    stdin.flushInput();
+    breakif(chars.toUpper(stdin.getc()) == 'N');
+endfor;
+
+end challenge12;

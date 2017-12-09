@@ -1,0 +1,42 @@
+program hello;
+#include ("stdlib.hhf");
+
+procedure showBits(value: word);
+begin showBits;
+
+	pushad();
+	
+	stdout.put("%");
+	mov(value, ax);
+	for(mov(0, cx); cx<16; inc(cx)) do
+		shl(1, ax);  // shift left
+		if (@c) then
+			stdout.put("1");
+		else
+			stdout.put("0");
+		endif;
+		
+		if (cx == 3 || cx == 7 || cx == 11) then
+			stdout.put("_");
+		endif;
+	endfor;
+	
+	popad();
+end showBits;
+
+begin hello;
+
+	mov(65535, ax);
+	mov(3, bx);
+	mul(bx); // bits will go to dx:ax (upper 16:lower 16)
+
+	showBits(dx);
+	stdout.newln();
+	showBits(ax);
+	stdout.newln();
+	
+	shl(16, edx);
+	mov(ax, dx);
+	
+	stdout.put((type uns32 edx), nl);
+end hello;

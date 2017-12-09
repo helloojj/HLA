@@ -1,0 +1,48 @@
+//Procedure showFactors (value: uns16);
+//Test values.
+//showFactors(0); // -1 ,1, (test prime number 13), (test non-prime number100)
+//showFactors(65535); // 65534
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+program factorFun;
+
+#include ("stdlib.hhf");
+
+procedure showFactors(value: uns16); @forward;
+
+procedure showFactors(value: uns16);
+begin showFactors;
+    stdout.put("factors of " , value, ": ");
+    
+    mov(0,ebx);
+    mov(value,bx);
+                        // value was here
+    for(mov(1,ecx); ecx < ebx; inc(ecx))do
+        mov(ebx, eax);
+        mov(0,edx);
+        div(ecx,edx:eax);
+        
+        if(edx == 0) then
+            stdout.put((type uns32 ecx), " ");
+        endif;
+    endfor;
+    stdout.put(value);
+    stdout.newln();
+
+end showFactors;
+
+begin factorFun;
+
+    showFactors(0);
+    showFactors(1);
+    showFactors(13);
+    showFactors(99);
+    showFactors(65534);
+    showFactors(65535);
+    
+
+end factorFun;
+
+
+

@@ -1,0 +1,113 @@
+program Challenge11;
+#include ("Stdlib.hhf")
+
+static
+	IntArray8: int8[10] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	IntArray16: int16[10] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	IntArray32: int32[10] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	lastIndex: uns32 := 9;
+	//addr: dword;
+
+procedure displayCells(address: dword; maxIndex: uns32; dataType: uns8); @forward;
+procedure resetCells(address: dword; maxIndex: uns32; dataType: uns8); @forward;
+procedure loadCells(address: dword; index: uns32; dataType: uns8); @forward;
+
+procedure displayCells(address: dword; maxIndex: uns32; dataType: uns8);
+begin displayCells;
+
+	pushad();
+
+	mov(address, ebx);
+	for (mov(0, ecx); ecx <= maxIndex; inc(ecx)) do
+    if (dataType == 1) then   
+        stdout.put("int8: " ,(type int8 [ebx+ecx]));
+
+    elseif (dataType == 2) then   
+        stdout.put("int16: ", (type int16 [ebx+ecx*2]));
+
+    elseif (dataType == 3) then   
+        stdout.put("int32: ", (type int32 [ebx+ecx*4]));
+        
+    endif;
+    stdout.newln();
+
+    endfor;
+		popad();
+
+end displayCells;
+
+procedure resetCells(address: dword; maxIndex: uns32; dataType: uns8);
+begin resetCells;
+	mov(address, ebx);
+	mov(0, eax);
+	for (mov(0, ecx); ecx <= lastIndex; inc(ecx)) do
+	    if (dataType == 1) then   
+        mov(0, IntArray8[ecx]);
+
+    elseif (dataType == 2) then   
+        mov(0, IntArray16[ecx*2]);;
+
+    elseif (dataType == 3) then   
+        mov(0, IntArray32[ecx*4]);
+        
+    endif;
+	endfor;
+
+end resetCells;
+
+procedure loadCells(address: dword; index: uns32; dataType: uns8);
+begin loadCells;
+	mov(address, ebx);
+	for (mov(0, ecx); ecx <= lastIndex; inc(ecx)) do
+	    if (dataType == 1) then   
+        rand.urange( -128, 127);
+		mov(eax, [ebx+ecx*4]);
+
+    elseif (dataType == 2) then   
+    	rand.urange( -32768, 32767);
+        mov(eax, [ebx+ecx*4]);
+
+    elseif (dataType == 3) then   
+    	rand.urange( -1000000, 1000000);
+        mov(eax, [ebx+ecx*4]);
+        
+    endif;
+	endfor;
+end loadCells;
+
+
+begin Challenge11;
+	rand.randomize();
+
+	forever
+
+		displayCells(&IntArray8, lastIndex, 1);
+		displayCells(&IntArray16, lastIndex, 2);
+		displayCells(&IntArray32, lastIndex, 3);
+		stdout.put("///////////////////",nl);
+	
+		loadCells(&IntArray8,lastIndex,1);
+		loadCells(&IntArray16,lastIndex,2);
+		loadCells(&IntArray32,lastIndex,3);
+	
+		displayCells(&IntArray8, lastIndex, 1);
+		displayCells(&IntArray16, lastIndex, 2);
+		displayCells(&IntArray32, lastIndex, 3);
+		stdout.put("///////////////////",nl);
+	
+		resetCells(&IntArray8, lastIndex, 1);
+		resetCells(&IntArray16, lastIndex, 2);
+		resetCells(&IntArray32, lastIndex, 3);
+	
+		displayCells(&IntArray8, lastIndex, 1);
+		displayCells(&IntArray16, lastIndex, 2);
+		displayCells(&IntArray32, lastIndex, 3);
+
+		stdout.put("Would you like to do it again? 0 to quit 1 to continue");
+		stdin.geti8();
+    if (al == 0) then 
+    break;
+    endif;
+
+	endfor;
+end Challenge11;

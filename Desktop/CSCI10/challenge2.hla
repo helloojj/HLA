@@ -1,0 +1,69 @@
+/*
+*
+* written by Justin Johnson
+* created on 30 August 2017
+* last modified on 30 August 2017
+*
+*/
+
+program challenge2;
+
+#include( "stdlib.hhf" );
+static
+num1: uns8;
+num2: uns8;
+stopLetter: char;
+
+begin challenge2;
+
+stdout.put( "Hello user welcome to challenge 2", nl);
+
+forever
+
+repeat
+
+stdout.put("Please enter a number from 1 to 50" nl);
+stdin.getu8();
+mov(al, num1);
+//stdout.put("You entered ", (type uns8 al), "(", num1, " ", nl);
+
+until(num1 >= 1 || num1 <= 50);
+
+repeat
+
+stdout.put("Please enter a second number from 1 to 50", nl);
+stdin.getu8();
+mov(al, num2);
+
+until(num2 >= 1 && num2 <= 50);
+
+
+if( num1 > al ) then
+
+stdout.put( num1, " is greater than ", num2, nl);
+
+
+elseif( num1 < al) then
+stdout.put(num1, "is less than ", num2, nl);
+
+else
+
+stdout.put(num1, " and " , (type uns8 al), " are equal " , nl);
+
+endif;
+
+
+stdout.put(" ", nl);s
+
+
+stdout.put(" Would you like to use this program again? [y/n]",nl);
+stdin.flushInput();
+stdin.getc();
+mov(al, stopLetter);
+
+
+breakif(stopLetter == 'n');
+
+endfor;
+
+end challenge2;

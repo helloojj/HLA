@@ -1,0 +1,799 @@
+/*
+ *
+ * written by            Justin Johnson
+ * created on            20 November 2017
+ * last modified on      8 December 2017
+ *
+ * This program creates a spreadsheet that you can edit the number,
+ * and do serveal types of calutions to them
+ *
+ */
+program project2;
+
+#include("stdlib.hhf");
+    
+static
+
+	calculate : uns32;
+  presentation: uns32;
+  myBool: boolean;
+  numCells: uns32;
+  dataType: uns32;
+  baseAddress: dword;
+
+// procedure getChar(prompt: string; min: char; max: char); @forward;
+procedure displayCells(address: dword; numbCells: uns32; dtype: uns32); @forward;
+procedure editCell(addr: dword; index: uns32; mtype: uns32); @forward;
+procedure computeLargest(address: dword; size: uns32; mtype: uns32); @forward;
+procedure getInt8(prompt: string; min: int8; max: int8); @returns("AL"); @forward;
+procedure getInt16(prompt: string; min: int16; max: int16); @returns("AX"); @forward;
+procedure getInt32(prompt: string; min: int32; max: int32); @returns("EAX"); @forward;
+procedure getUns32(prompt: string; min: uns32; max: uns32); @returns("EAX"); @forward;
+procedure averageCells(address: dword; numbCells: uns32; dtype: uns32);  @forward;
+procedure sumCells(address: dword; numbCells: uns32; dtype: uns32);  @forward;
+procedure showBits8(value: byte); @forward;
+procedure showBits16(value: word); @forward;
+procedure showBits32(value: dword); @forward;
+
+// get specific char value for exit
+/*
+
+procedure getChar(prompt: string; min: char; max: char);
+begin getChar;
+
+push(ebx);
+push(ecx);
+
+forever
+
+	stdout.put(prompt);
+  try
+  	chars.toUpper(stdin.getc());
+  	unprotected;
+  	if(al == 'Y' || al == 'N') then
+  		break;
+  	else
+  		stdout.put("Enter ", min, " or ", max, nl);
+  	endif;
+    anyexception
+     	stdout.put( "Invaild input.", nl );
+      stdout.put("Try again", nl);
+    endtry;    
+    endfor;
+
+	pop(ecx);
+	pop(ebx);
+
+end getChar;
+
+*/
+
+// next four procederues allow for robust user intput
+procedure getInt8 (prompt: string; min: int8; max: int8);
+begin getInt8;
+
+	push(edx);
+	push(ecx);
+	push(ebx);
+	forever
+		try
+			stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+			stdin.flushInput();
+			stdin.geti8();
+			unprotected
+				cmp((type int8 al), min);
+				jl INT8_BAD;
+				cmp((type int8 al), max);
+				jg INT8_BAD;
+				break;
+				INT8_BAD:
+					stdout.put(nl, "Value not in required range.");
+		anyexception
+			stdout.put(nl, "Invalid input.");
+		endtry;
+	endfor;
+	pop(ebx);
+	pop(ecx);
+	pop(edx);
+
+end getInt8;
+
+procedure getInt16(prompt: string; min: int16; max: int16);
+begin getInt16;
+
+	push(edx);
+	push(ecx);
+	push(ebx);
+
+	forever
+		try
+			stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+			stdin.flushInput();
+			stdin.geti16();
+			unprotected
+				cmp((type int16 ax), min);
+				jl INT8_BAD;
+				cmp((type int16 ax), max);
+				jg INT8_BAD;
+				break;
+				INT8_BAD:
+				stdout.put(nl, "Value not in required range.");
+		anyexception
+			stdout.put(nl, "Invalid input.");
+		endtry;
+	endfor;
+
+	pop(ebx);
+	pop(ecx);
+	pop(edx);
+
+end getInt16;
+
+procedure getInt32(prompt: string; min: int32; max: int32);
+begin getInt32;
+
+	push(edx);
+	push(ecx);
+	push(ebx);
+
+	forever
+		try
+			stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+			stdin.flushInput();
+			stdin.geti32();
+			unprotected
+				cmp((type int32 eax), min);
+				jl INT8_BAD;
+				cmp((type int32 eax), max);
+				jg INT8_BAD;
+				break;
+				INT8_BAD:
+				stdout.put(nl, "Value not in required range.");
+		anyexception
+			stdout.put(nl, "Invalid input.");
+		endtry;
+	endfor;
+
+	pop(ebx);
+	pop(ecx);
+	pop(edx);
+
+end getInt32;
+
+procedure getUns32(prompt: string; min: uns32; max: uns32);
+begin getUns32;
+
+	push(edx);
+	push(ecx);
+	push(ebx);
+
+	forever
+		try
+			stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+			stdin.flushInput();
+			stdin.getu32();
+			unprotected
+				cmp((type uns32 eax), min);
+				jl INT8_BAD;
+				cmp((type uns32 eax), max);
+				jg INT8_BAD;
+				break;
+				INT8_BAD:
+				stdout.put(nl, "Value not in required range.");
+		anyexception
+			stdout.put(nl, "Invalid input.");
+		endtry;
+	endfor;
+
+	pop(ebx);
+	pop(ecx);
+	pop(edx);
+
+end getUns32;
+	
+// display all cells in array
+procedure displayCells(address: dword; numbCells: uns32; dtype: uns32);
+begin displayCells;
+	
+	stdout.newln();
+	stdout.newln();
+	stdout.newln();
+
+	mov(address, eax);
+	dec(numbCells);
+
+  for(mov(0, ecx); ecx < numbCells; inc(ecx)) do
+		inc(ecx);
+    stdout.put("[",(type uns32 ecx),"][");
+		dec(ecx);
+		
+		if(presentation == 0) then
+			if (dataType == 1) then   
+				stdout.put((type int8 [eax+ecx]));
+				stdout.put("]");
+			elseif (dataType == 2) then   
+				stdout.put((type int16 [eax+ecx*2]));
+				stdout.put("]");
+			elseif (dataType == 3) then   
+				stdout.put((type int32 [eax+ecx*4]));
+				stdout.put("]");
+			endif;
+			stdout.newln();
+		endif;
+		
+		if(presentation == 1)then
+			if (dataType == 1) then   
+				showBits8([eax+ecx]);
+				stdout.put("]");
+			elseif (dataType == 2) then   
+				showBits16([eax+ecx*2]);
+				stdout.put("]");
+			elseif (dataType == 3) then   
+				showBits32([eax+ecx*4]);
+				stdout.put("]");
+			endif;
+			stdout.newln();
+		endif;
+		
+		if(presentation == 2)then
+			if (dataType == 1) then  
+				stdout.put("$",(type byte [eax+ecx]),"]");
+			elseif (dataType == 2) then   
+				stdout.put("$",(type word [eax+ecx*2]),"]");
+			elseif (dataType == 3) then   
+				stdout.put("$", (type dword [eax+ecx*4]),"]");
+			endif;
+			stdout.newln();
+		endif;
+		
+  endfor;
+	
+	if(myBool == false) then
+		if(presentation == 0) then
+			if (dataType == 1) then   
+				stdout.put((type int8 [eax+ecx]));
+			elseif (dataType == 2) then   
+				stdout.put((type int16 [eax+ecx*2]));
+			elseif (dataType == 3) then   
+				stdout.put((type int32 [eax+ecx*4]));
+			endif;
+		endif;
+		
+		if(presentation == 1)then
+			if (dataType == 1) then   
+				showBits8([eax+ecx]);
+			elseif (dataType == 2) then   
+				showBits8([eax+ecx*2]);
+			elseif (dataType == 3) then   
+				showBits8([eax+ecx*4]);
+			endif;
+		endif;
+		
+		if(presentation == 2)then
+			if (dataType == 1) then   
+				mov([eax+ecx], al);
+				stdout.put(al);
+			elseif (dataType == 2) then   
+				mov([eax+ecx*2], ax);
+				stdout.put(ax);
+			elseif (dataType == 3) then   
+				mov([eax+ecx*4], eax);
+				stdout.put(eax);
+			endif;
+		endif;
+	else 
+		stdout.put("[ERROR]");
+		mov(false, myBool);
+	endif;	
+
+		if(calculate == 0)then
+			stdout.put(" [SUM]");
+		elseif(calculate == 1)then
+			stdout.put(" [AVERAGE]");
+		elseif(calculate == 2)then
+			stdout.put(" [SMALLEST]");
+		elseif(calculate == 3)then
+			stdout.put(" [LARGEST]");
+		endif;
+	stdout.newln();
+
+ end displayCells;
+
+// allow user to edit cell values
+procedure editCell(addr: dword; index: uns32; mtype: uns32);
+begin editCell;
+
+	push(eax);
+	push(ecx);
+	push(ebx);
+	push(edx);
+
+  mov(addr, ebx);
+
+  // for human readable form from the index
+  dec(index);
+  mov(index, ecx);
+  inc(index);
+
+	stdin.flushInput();
+
+	cmp(mtype, 1);
+		je MTYPE_;
+	cmp(mtype, 2);
+		je MTYPE2_;
+	cmp(mtype, 3);
+		je MTYPE3_;
+
+  MTYPE_:
+  	getInt8("Enter a new int8 value: " , - 120, 120);
+  	mov(al,(type int8 [ebx+ecx*1]));
+  	jmp EDIT_;
+
+ MTYPE2_:
+  getInt16("Enter a new int16 value: ", -32000, 32000);
+  mov(ax, (type int16 [ebx+ecx*2]));
+ 	jmp EDIT_;
+
+  MTYPE3_:
+  	getInt32("Enter a new int32 value: ", -2000000000, 2000000000);
+  	mov(eax,(type int32 [ebx+ecx*4]));
+
+	EDIT_:
+
+	pop(edx);
+	pop(ebx);
+	pop(ecx);
+	pop(eax);
+
+end editCell;
+
+// get largest value
+procedure computeLargest(address: dword; size: uns32; mtype: uns32);
+begin computeLargest;
+
+	push(eax);
+	push(ecx);
+	push(ebx);
+	push(edx);
+
+  mov(address,eax);
+
+	mov(0,edx);
+  dec(size);
+
+	if (dataType == 1) then   
+  	mov([eax],bl);
+  elseif (dataType == 2) then   
+  	mov([eax],bx);
+  elseif (dataType == 3) then   
+  	mov([eax],ebx);
+  endif;
+      for(mov(0,ecx);ecx < size;inc(ecx)) do
+	if (dataType == 1) then   
+  		mov([eax+ecx*1],dl);
+  	if((type int8 dl) >= (type int8 bl)) then
+			mov([eax+ecx*1],bl);
+  	endif;
+  elseif (dataType == 2) then   
+  	mov([eax+ecx*2],dx);
+  	if((type int16 dx) >= (type int16 bx)) then
+			mov([eax+ecx*2],bx);
+   	endif;
+  elseif (dataType == 3) then   
+  	mov([eax+ecx*4],edx);
+  	if((type int32 edx) >= (type int32 ebx)) then
+			mov([eax+ecx*4],ebx);
+    endif;
+  endif;
+
+	endfor;
+
+	mov(size,ecx);
+
+  if (dataType == 1) then   
+  	mov(bl,[eax+ecx*1]);
+  elseif (dataType == 2) then   
+  	mov(bx,[eax+ecx*2]);
+  elseif (dataType == 3) then   
+  	mov(ebx,[eax+ecx*4]);
+  endif;
+
+	pop(edx);
+	pop(ebx);
+	pop(ecx);
+	pop(eax);
+
+end computeLargest;
+
+// get smallest value
+procedure computeSmallest(address: dword; numbCells: uns32; dtype: uns32);
+begin computeSmallest;
+
+	push(eax);
+	push(ecx);
+	push(ebx);
+	push(edx);
+
+	mov(address,eax);
+	mov(0,edx);
+	dec(numbCells);
+
+	if (dataType == 1) then   
+		mov([eax],bl);
+	elseif (dataType == 2) then   
+		mov([eax],bx);
+	  elseif (dataType == 3) then   
+	  	mov([eax],ebx);
+	  endif;
+	  for(mov(0,ecx);ecx<numbCells;inc(ecx)) do
+		if (dataType == 1) then   
+	  	mov([eax+ecx*1],dl);
+	  	if((type int8 dl) <= (type int8 bl)) then
+				mov([eax+ecx*1],bl);
+	    endif;
+	    elseif (dataType == 2) then   
+	     	mov([eax+ecx*2],dx);
+	     	if((type int16 dx) <= (type int16 bx)) then
+					mov([eax+ecx*2],bx);
+	      endif;
+	      elseif (dataType == 3) then   
+	      	mov([eax+ecx*4],edx);
+	      	if((type int32 edx) <= (type int32 ebx)) then
+						mov([eax+ecx*4],ebx);
+	        endif;
+	      endif;
+	endfor;
+
+	mov(numbCells,ecx);
+	if (dataType == 1) then   
+		mov(bl,[eax+ecx*1]);
+	elseif (dataType == 2) then   
+		mov(bx,[eax+ecx*2]);
+	elseif (dataType == 3) then   
+		mov(ebx,[eax+ecx*4]);
+	endif;
+
+	pop(edx);
+	pop(ebx);
+	pop(ecx);
+	pop(eax);
+
+end computeSmallest;
+
+// average of the cell values
+procedure averageCells(address: dword; numbCells: uns32; dtype: uns32);
+begin averageCells;
+
+	push(eax);
+	push(ecx);
+	push(ebx);
+	push(edx);
+
+	mov(address ,eax);
+	mov(0, edx);
+	mov(0, ebx);
+	dec(numbCells);
+
+		for (mov(0, ecx); ecx < numbCells; inc(ecx)) do
+			if (dataType == 1) then   
+	    	mov([eax+ecx],dl);
+	    	add(dl,bl);
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	    	elseif (dataType == 2) then   
+	      	mov([eax+ecx*2],dx);
+	      	add(dx,bx);
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	    	elseif (dataType == 3) then   
+	    		mov([eax+ecx*4],edx);
+	    		add(edx,ebx);
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	    	endif;
+	endfor;
+	mov(ebx,eax);
+	mov(numbCells,ebx);
+	if (dataType == 1) then   
+		cbw();
+		idiv(bl, ax);
+		mov(address,ebx);
+		mov(al,[ebx+ecx]);	
+	elseif (dataType == 2) then 
+		cwd();
+		idiv(bx, dx:ax );
+		mov(address,ebx);
+		mov(ax,[ebx+ecx*2]);
+		stdout.put("Hello");
+	elseif (dataType == 3) then  
+		cdq();		
+		idiv(ebx, edx:eax);
+		mov(address,ebx);
+		mov(eax,[ebx+ecx*4]);
+	    endif;
+	
+	pop(edx);
+	pop(ebx);
+	pop(ecx);
+	pop(eax);
+
+end averageCells;
+
+// next three proceders will show 
+procedure showBits8(value: byte);
+begin showBits8;
+	push(eax);
+	push(ecx);
+
+	mov(value,AL);
+	stdout.put("%");
+	for (mov(0,cl);cl<8;inc(cl))do
+		shl(1,al);
+		if (@c) then
+		    stdout.put("1");
+		else
+		    stdout.put("0");
+		endif;
+		if (CL==3)then
+		    stdout.put("_");
+		endif;
+	endfor;
+
+	pop(ecx);
+	pop(eax);
+
+end showBits8;
+
+procedure showBits16(value: word);
+begin showBits16;
+	push(eax);
+	push(ecx);
+
+	mov(value,AX);
+	stdout.put("%");
+
+	for (mov(0,cl);cl<16;inc(cl))do
+		shl(1,al);
+		if (@c) then
+		   stdout.put("1");
+		else
+		   stdout.put("0");
+		endif;
+		if (CL==3 ||CL==7 ||CL==11||CL==15) then
+		   stdout.put("_");
+		endif;
+	endfor;
+	pop(ecx);
+	pop(eax);
+end showBits16;
+
+procedure showBits32(value: dword);
+begin showBits32;
+	push(eax);
+	push(ecx);
+	mov(value,EAX);
+	stdout.put("%");
+	for (mov(0,cl);cl<32;inc(cl))do
+		shl(1,al);
+	  if (@c) then
+	    stdout.put("1");
+	    else
+	    	stdout.put("0");
+	    endif;
+	   if (cl == 3 ||cl == 7 ||cl == 11||cl == 15||cl == 19||cl == 23|| cl == 27) then
+	      stdout.put("_");
+	    endif;
+  endfor;
+  pop(ecx);
+  pop(eax);
+
+end showBits32;
+
+// add cell values together
+procedure sumCells(address: dword; numbCells: uns32; dtype: uns32);
+begin sumCells;
+
+	push(eax);
+	push(ecx);
+	push(ebx);
+	push(edx);
+
+	mov(address,eax);
+
+	mov(0,edx);
+	mov(0,ebx);
+	dec(numbCells);
+
+	for(mov(0,ecx);ecx<numbCells;inc(ecx)) do
+		if (dataType == 1) then   
+	  	mov([eax+ecx*1],(type int8 dl));
+	  	add((type int8 dl),(type int8 bl));
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	    elseif (dataType == 2) then   
+	    	mov([eax+ecx*2],dx);
+	    	add((type int16 dx),(type int16 bx));
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	    elseif (dataType == 3) then   
+	    	mov([eax+ecx*4],edx);
+	    	add((type int32 edx),(type int32 ebx));
+			if(@o)then
+				mov(true, myBool);
+			endif;
+	  endif;
+	endfor;	
+	mov(numbCells,ecx);
+	if (dataType == 1) then   
+	 	mov((type int8 bl),[eax+ecx*1]);
+		stdout.put((type int8 [eax+ecx*1]),nl,nl);
+	elseif (dataType == 2) then   
+		mov((type int16 bx),[eax+ecx*2]);
+	elseif (dataType == 3) then   
+	 	mov((type int32 ebx),[eax+ecx*4]);
+	 endif;
+	
+	pop(edx);
+	pop(ebx);
+	pop(ecx);
+	pop(eax);
+
+end sumCells;
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+begin project2;
+	
+	// used to reset the program at users request
+	RESET_:
+
+	console.cls();
+	mov(false, myBool);
+
+	//FOREVER_:
+
+	stdin.flushInput();
+	mov(getUns32("Number of cells[1-10]" ,1, 10), numCells);
+	//mov(eax, numCells);
+	inc(numCells);
+	getUns32("What type [1: uns8, 2: uns16, 3: uns32]:", 1, 3);
+	mov(eax, dataType);
+	mov(numCells, eax);
+
+	cmp(dataType, 2);
+		je MUL_;
+	cmp(dataType, 3);
+		je MUL1_;
+	MUL_:
+		mul(2, eax);
+		jmp OVER_;
+	MUL1_:
+		mul(4, eax);
+
+		OVER_:
+
+	stdout.put((type uns32 eax)," bytes allocated.",nl);
+	mem.zalloc(eax);
+	mov(eax, baseAddress);
+	stdout.put("Press Enter to Continue");
+
+	console.cls();
+
+	// for loop for main part of program
+	FOREVER1_:
+
+		// display the cell values above the menu
+		displayCells(baseAddress, numCells, dataType);
+
+		stdout.put(nl, "Would you like to?",nl,nl,"[1] Edit Cell",nl,"[2] Calculation",nl,"[3] presentation",nl,"[4] Reset",nl,"[0] Quit",nl,nl); 
+
+		stdout.put("Push the number for the cell you wuold like to edit starting at 1",nl);               
+
+		getUns32("Your Choices", 0, 4);
+		stdout.newln();
+
+		// cmpare to determine what the user wants to do
+
+		// to exit the program
+		cmp(al, 0);
+			je ENDFOR_;
+		// for editing cells
+		cmp(al, 1);
+			je PART_;
+		// chose calcuation
+		cmp(al, 2);
+			je PART2_;
+		// output presentation
+		cmp(al, 3);
+			je PART3_;
+		// reset the program and free memory
+		cmp(al, 4);
+		mem.free(baseAddress);
+		console.cls();
+		mem.zalloc(eax);
+			jmp RESET_;
+
+			// user to select what cell they want edit
+		PART_:
+			stdout.put("Please enter index of cell to edit: ",nl);
+	    mov(numCells, eax);
+			dec(eax);
+	    getUns32("Your Choice", 1, eax);   
+	    editCell(baseAddress, eax, dataType);
+	    stdout.newln();
+	    	jmp HERE_;
+
+	    // where the user will detemine what calculation they would like
+		PART2_:
+			stdout.put("Please select calculation?",nl,nl,"[1] Sum",nl,"[2] Average",nl,"[3] Smallest",nl,"[4] Largest", nl);
+			getUns32("Your Choice", 1, 4);
+			dec(eax);
+			mov(eax, calculate);
+				jmp HERE_;
+
+			// output for decimal binary or hex
+		PART3_:
+			stdout.put("Select mode.",nl, "[1] Decimal",nl,"[2] Binary",nl,"[3] Hex",nl ,"Your Choice: ");
+			getUns32("Your Choice", 1, 3);
+			dec(eax);
+			mov(eax, presentation);
+				//jmp HERE_;
+
+		HERE_:
+
+			mov(baseAddress,eax);
+			mov(numCells,ecx);
+			mov(0, edx);
+
+			//NEXT_:
+
+			// compare to find what the user wants for the calcuation default sum
+			cmp(calculate, 0);
+				je CALC_;
+			cmp(calculate, 1);
+				je CALC1_;
+			cmp(calculate, 2);
+				je CALC2_;
+			cmp(calculate, 3);
+				je CALC3_;
+		
+		// chose what calculation user would like. sum, average, smallest value or largest value
+		CALC_:
+			sumCells(baseAddress, numCells, dataType);
+			jmp DOWN_;
+		CALC1_:
+			averageCells(baseAddress, numCells, dataType);
+			jmp DOWN_;
+		CALC2_:
+			computeSmallest(baseAddress, numCells, dataType);
+			jmp DOWN_;
+		CALC3_:
+			computeLargest(baseAddress, numCells, dataType);
+
+			DOWN_:
+		jmp FOREVER1_;
+
+	//ENDFOR1_:
+
+//	stdin.flushInput();
+//	getChar("Would you like to go again[y/n]?", 'Y', 'N');
+//	cmp(al, 'Y');
+//		jne ENDFOR_;
+//	console.cls();
+//		jmp FOREVER_;
+
+	// end of program
+		ENDFOR_:
+	// free the memory
+	mem.free(baseAddress);
+	stdout.put("Memory freed.",nl, nl,nl);
+
+	// your secret name!
+	stdout.put(nl, "Goodbye Captain Awesome!", nl, nl);
+
+end project2;

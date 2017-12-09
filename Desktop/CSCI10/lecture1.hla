@@ -1,0 +1,33 @@
+program lecture;
+
+#include("stdlib.hhf");
+
+procedure getUns32; @forward;
+
+procedure getUns32;
+begin getUns32;
+
+forever
+stdout.put("Enter an uns32 value: ");
+try
+stdin.getu32();
+unprotected break;
+anyexception
+stdout.put("Try again",nl);
+endtry;
+endfor;
+
+end getUns32;
+
+begin lecture;
+rand.randomize();
+
+forever
+rand.urange(1,100);
+stdout.put("next value -> ", (type int32 eax), nl);
+
+getUns32();
+stdout.put("you enters -> ", (type uns32 eax) ,nl);
+endfor;
+
+end lecture;

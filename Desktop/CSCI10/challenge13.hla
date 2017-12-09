@@ -1,0 +1,148 @@
+/*
+ * COMPLETE THE PROGRAM DOCUMENTATION HERE
+ *
+ */
+program ProgrammingChallengeThirteen;
+
+#include ("stdlib.hhf")
+
+/* forward declarations */
+procedure getInt8 (prompt: string; min: int8; max: int8); @returns("al"); @forward;
+
+/* procedure definitions */
+procedure getInt8 (prompt: string; min: int8; max: int8);
+begin getInt8;
+
+	push(edx);
+	push(ecx);
+	push(ebx);
+	forever
+		try
+			stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+			stdin.flushInput();
+			stdin.geti8();
+			unprotected
+				cmp((type int8 al), min);
+				jl INT8_BAD;
+				cmp((type int8 al), max);
+				jg INT8_BAD;
+				break;
+				INT8_BAD:
+					stdout.put(nl, "Value not in required range.");
+		anyexception
+			stdout.put(nl, "Invalid input.");
+		endtry;
+	endfor;
+	pop(ebx);
+	pop(ecx);
+	pop(edx);
+
+end getInt8;
+
+/* program variables and main */
+
+static
+	input: int8;
+	isPrime: boolean;
+	
+begin ProgrammingChallengeThirteen;
+
+	forever
+		
+		console.cls();
+		
+		mov(getInt8("Please enter an int8", -127, 127), input);
+		
+		stdout.put(nl, "What do you want to do with your input value?", nl);
+		stdout.put("1. Test to see if it is negative", nl);
+		stdout.put("2. Test to see if it is even", nl);
+		stdout.put("3. Reverse its sign", nl);
+		stdout.put("4. Test to see if it is prime", nl);
+		stdout.put("your choice: ");
+		getInt8("your choice", 1, 4);
+		
+		console.cls();
+
+		cmp(al, 1);
+			je NEXT_;
+		cmp(al, 2);
+			je NEXT2_;
+		cmp(al, 3);
+			je NEXT3_;
+
+// the else statement to see is prime
+	 cmp(input, 0);
+			jge NEXT4_;
+	 stdout.put("Reversing the sign.", nl, nl);
+   mov(input, al);
+   not(al);
+   add(1, al);
+   mov(al, input);
+   	NEXT4_:
+   mov(true, isPrime);
+   cmp(input, 2);
+   	jge NEXT5_;
+   	mov(false, isPrime);
+   		NEXT5_:
+  for (mov(2, cl); cl<input; inc(cl)) do
+    mov(0, ah);
+    mov(input, al);
+    div(cl, ax);
+    cmp(ah, 0);
+    	jne NEXT6_;
+    mov(false, isPrime);
+    	NEXT6_:
+	endfor;
+	cmp(isPrime, true);
+		jne NEXT7_;
+	stdout.put(input, " is a prime number.", nl);
+		jmp END_;
+		NEXT7_:
+	stdout.put(input, " is not a prime number.", nl);
+		jmp END_;
+
+			NEXT_:
+		cmp(input, 0);
+			jge PART_;
+		stdout.put(input, " is a negative value.", nl);
+			jmp END_;
+			PART_:
+		stdout.put(input, " is greater than or equal to zero.", nl);
+			jmp END_;
+
+			NEXT2_:
+		mov(0, ah);
+    mov(input, al);
+    idiv(2, ax);
+    cmp(ah, 0);
+    	jne PART2_;
+    stdout.put(input, " is an even number.", nl);
+    	jmp END_;
+    	PART2_:
+    	//jmp END_;
+    stdout.put(input, " is an odd number.", nl);
+    	jmp END_;
+ 
+			NEXT3_:
+		mov(input, al);
+    not(al);
+    add(1, al);
+    stdout.put(input, " sign reversed is ", (type int8 al), nl);
+    	//jmp END_;
+
+		END_:
+		
+		stdout.put(nl, nl, "Go again (y/n)? ");
+		stdin.flushInput();
+		
+		chars.toUpper(stdin.getc()); // code for upper case
+		
+		cmp(al, 'N');
+		jne GO_AGAIN;
+			break;
+		GO_AGAIN:
+			console.cls();
+		
+	endfor;
+	
+end ProgrammingChallengeThirteen;
